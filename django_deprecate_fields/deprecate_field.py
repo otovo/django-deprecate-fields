@@ -18,27 +18,18 @@ class DeprecatedField(object):
         """
         Try to find this field's name in the model class
         """
-        for k, v in type(obj).__dict__.items():
-            if v is self:
-                return k
-        return "<unknown>"
+        return next(
+            (k for k, v in type(obj).__dict__.items() if v is self), "<unknown>"
+        )
 
     def __get__(self, obj, type=None):
-        msg = "accessing deprecated field %s.%s" % (
-            obj.__class__.__name__,
-            self._get_name(obj),
-        )
+        msg = f"accessing deprecated field {obj.__class__.__name__}.{self._get_name(obj)}"
         warnings.warn(msg, DeprecationWarning, stacklevel=2)
         logger.warning(msg)
-        if not callable(self.val):
-            return self.val
-        return self.val()
+        return self.val if not callable(self.val) else self.val()
 
     def __set__(self, obj, val):
-        msg = "writing to deprecated field %s.%s" % (
-            obj.__class__.__name__,
-            self._get_name(obj),
-        )
+        msg = f"writing to deprecated field {obj.__class__.__name__}.{self._get_name(obj)}"
         warnings.warn(msg, DeprecationWarning, stacklevel=2)
         logger.warning(msg)
         self.val = val
