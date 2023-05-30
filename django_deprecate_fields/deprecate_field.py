@@ -24,12 +24,13 @@ class DeprecatedField(object):
         return "<unknown>"
 
     def __get__(self, obj, type=None):
-        msg = "accessing deprecated field %s.%s" % (
-            obj.__class__.__name__,
-            self._get_name(obj),
-        )
-        warnings.warn(msg, DeprecationWarning, stacklevel=2)
-        logger.warning(msg)
+        if obj is not None:
+            msg = "accessing deprecated field %s.%s" % (
+                obj.__class__.__name__,
+                self._get_name(obj),
+            )
+            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+            logger.warning(msg)
         if not callable(self.val):
             return self.val
         return self.val()
